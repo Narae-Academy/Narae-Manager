@@ -37,6 +37,7 @@ public static class ExportService
             var s = expanded[i++];
             result.Add(new(d.ToString("yyyyMMdd"), c.StartTime, c.EndTime, c.RemoteType, slot, c.TimeType, s.TeacherCode, s.RoomCode, s.SubjectCode));
         }
+        ValidateNoResourceConflicts(result);
         return result;
     }
 
@@ -84,6 +85,21 @@ public static class ExportService
                 for(int i=0;i<dates.Count;i++){foreach(var v in new[]{dates[i].ToString("yyyy-MM-dd"),day[(int)dates[i].DayOfWeek],contents[i],"강의·실습",teacher,teacher,""})t.Cell().Border(0.5f).Padding(3).Text(v);}
             });
         });page.Footer().AlignCenter().Text(x=>{x.Span("페이지 ");x.CurrentPageNumber();});})).GeneratePdf(path);
+    }
+
+    private static void ValidateNoResourceConflicts(IReadOnlyList<ScheduleRow> rows)
+    {
+        var teacherConflict = rows
+            .GroupBy(x => new { x.TrainingDate, x.SlotStart, x.TeacherCode })
+            .FirstOrDefault(x => x.Key.TeacherCode.Length > 0 && x.Count() > 1);
+        if (teacherConflict is not null)
+            throw new InvalidOperationException($"강사 충돌: {teacherConflict.Key.TrainingDate} {teacherConflict.Key.SlotStart} {teacherConflict.Key.TeacherCode}");
+
+        var roomConflict = rows
+            .GroupBy(x => new { x.TrainingDate, x.SlotStart, x.RoomCode })
+            .FirstOrDefault(x => x.Key.RoomCode.Length > 0 && x.Count() > 1);
+        if (roomConflict is not null)
+            throw new InvalidOperationException($"강의실 충돌: {roomConflict.Key.TrainingDate} {roomConflict.Key.SlotStart} {roomConflict.Key.RoomCode}");
     }
 
     private static List<string> HourSlots(string start,string end){int ToMin(string x)=>int.Parse(x[..2])*60+int.Parse(x[2..]);string ToText(int x)=>$"{x/60:00}{x%60:00}";var list=new List<string>();for(var m=ToMin(start);m<ToMin(end);m+=60)list.Add(ToText(m));return list;}
