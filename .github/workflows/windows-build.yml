@@ -1,0 +1,27 @@
+name: Windows EXE Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore src/NaraeManager/NaraeManager.csproj
+      - name: Publish single EXE
+        run: dotnet publish src/NaraeManager/NaraeManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+      - name: Upload Narae Manager
+        uses: actions/upload-artifact@v4
+        with:
+          name: Narae-Manager-win-x64
+          path: publish/NaraeManager.exe
