@@ -4,13 +4,13 @@ namespace NaraeManager;
 
 public static class Database
 {
-    private static readonly string Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NaraeManager");
-    private static readonly string DbPath = Path.Combine(Folder, "narae-manager.db");
+    private static readonly string Folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NaraeManager");
+    private static readonly string DbPath = System.IO.Path.Combine(Folder, "narae-manager.db");
     private static string ConnectionString => $"Data Source={DbPath};Foreign Keys=True";
 
     public static void Initialize()
     {
-        Directory.CreateDirectory(Folder);
+        System.IO.Directory.CreateDirectory(Folder);
         using var c = new SqliteConnection(ConnectionString);
         c.Open();
         var sql = @"
