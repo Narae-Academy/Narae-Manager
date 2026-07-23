@@ -117,5 +117,5 @@ public partial class MainWindow : Window
 
     private static string DefaultTeacher(long courseId)=>Database.GetTeachers(courseId).FirstOrDefault(x=>x.IsDefault)?.TeacherName??Database.GetTeachers(courseId).FirstOrDefault()?.TeacherName??"";
     private static string? SavePath(string name,string filter){var d=new SaveFileDialog{FileName=name,Filter=filter};return d.ShowDialog()==true?d.FileName:null;}
-    private static string Safe(string value)=>string.Concat(value.Where(ch=>!Path.GetInvalidFileNameChars().Contains(ch))).Replace(' ','_');
+    private static string Safe(string value)=>string.Concat(value.Where(ch=>!System.IO.Path.GetInvalidFileNameChars().Contains(ch))).Replace(' ','_');
 }
